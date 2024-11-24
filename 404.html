@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
+      authDomain: "tiny-redirect.firebaseapp.com",
+      databaseURL: "https://tiny-redirect-default-rtdb.firebaseio.com",
+      projectId: "tiny-redirect",
+      storageBucket: "tiny-redirect.firebasestorage.app",
+      messagingSenderId: "483985123684",
+      appId: "1:483985123684:web:0e2f992f3ae1729ee23271",
+      measurementId: "G-PQLS777XNJ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Extract alias from the URL
+    const path = window.location.pathname.replace("/", "");
+
+    // Redirect based on alias
+    async function handleRedirect(alias) {
+      if (!alias) {
+        document.body.innerHTML = "<h1>404 - Page Not Found</h1>";
+        return;
+      }
+
+      try {
+        const aliasRef = ref(database, `Links/${alias}`);
+        const snapshot = await get(aliasRef);
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          window.location.href = data.targetUrl; // Redirect to the target URL
+        } else {
+          document.body.innerHTML = "<h1>404 - Link Not Found</h1>";
+        }
+      } catch (error) {
+        console.error("Error fetching alias:", error);
+        document.body.innerHTML = "<h1>404 - Page Not Found</h1>";
+      }
+    }
+
+    // Trigger the redirect
+    handleRedirect(path);
+  </script>
+</head>
+<body>
+  <h1>Redirecting...</h1>
+</body>
+</html>
