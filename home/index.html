@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>TinyRedirect</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+    /* General styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header styles */
+    header {
+      background-color: #6c5ce7;
+      color: white;
+      padding: 1.5em 0;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    header p {
+      font-size: 1.2em;
+      font-weight: 400;
+      margin-top: 0.5em;
+    }
+
+    /* Main content */
+    main {
+      flex: 1;
+      padding: 2em;
+      text-align: center;
+    }
+
+    main h2 {
+      color: #6c5ce7;
+      font-weight: 600;
+      margin-bottom: 1em;
+    }
+
+    .card-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5em;
+      margin-top: 2em;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5em;
+      width: 300px;
+      text-align: center;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h3 {
+      color: #6c5ce7;
+      font-weight: 600;
+      margin-bottom: 0.5em;
+    }
+
+    .card p {
+      font-size: 1em;
+      color: #555;
+    }
+
+    /* URL Input Card */
+    .url-card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 2em;
+      margin: 2em auto;
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .url-card input[type="text"] {
+      width: 80%;
+      padding: 0.8em;
+      margin: 1em 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+
+    .url-card button {
+      padding: 0.8em 1.5em;
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .url-card button:hover {
+      background-color: #5746b2;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #6c5ce7;
+      color: white;
+      text-align: center;
+      padding: 1em 0;
+      margin-top: auto;
+    }
+
+    footer .social-icons {
+      margin-top: 1em;
+    }
+
+    footer .social-icons a {
+      margin: 0 10px;
+      color: white;
+      text-decoration: none;
+      font-size: 1.5em;
+      transition: color 0.3s ease-in-out;
+    }
+
+    footer .social-icons a:hover {
+      color: #ddd;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header Section -->
+  <header>
+    <h1>TinyRedirect</h1>
+    <p>Make your links shorter, simpler, and smarter.</p>
+  </header>
+
+  <!-- Main Content Section -->
+  <main>
+    <h2>About TinyRedirect</h2>
+    <p>TinyRedirect is your go-to tool for shortening long URLs into sleek and manageable links.
+      Whether you're sharing on social media or organizing links for work, TinyRedirect makes it quick and simple.</p>
+
+    <!-- URL Input Card -->
+    <div class="url-card">
+      <h3>Shorten Your URL</h3>
+      <p>Paste your URL below and get a shorter, shareable link instantly!</p>
+      <input type="text" placeholder="Enter your URL here..." id="targetUrlInput" />
+      <input type="text" placeholder="Enter a custom alias (optional)" id="aliasInput">
+      <input type="text" id="genLink" placeholder="Generated link ">
+      <button id="generateBtn">Shorten URL</button>
+    </div>
+
+    <!-- Card Container -->
+    <div class="card-container">
+      <div class="card">
+        <h3>No Credit Card Required</h3>
+        <p>Enjoy the simplicity of URL shortening without the hassle of payments or hidden fees.</p>
+      </div>
+      <div class="card">
+        <h3>No Login Needed</h3>
+        <p>Start shortening links instantly. No signups, no accounts, just efficiency.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Section -->
+  <footer>
+    <p>© 2024 TinyRedirect. All rights reserved.</p>
+    <div class="social-icons">
+      <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://twitter.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-square-x-twitter"></i></a>
+      <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+    </div>
+  </footer>
+  <script src="url.js" type="module"></script>
+</body>
+
+</html>
