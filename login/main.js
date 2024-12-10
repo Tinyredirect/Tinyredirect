@@ -51,25 +51,6 @@ document.querySelector("form").addEventListener("submit", async (event) => {
 });
 
 // Handle Sign-Up
-SignUpBtn.addEventListener("click", async () => {
-  const email = emailT.value;
-  const password = passwordT.value;
-
-  if (!email || !password) {
-    alert("Please enter both email and password.");
-    return;
-  }
-
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    console.log("Sign-up successful!", user);
-    alert("Account created successfully! Welcome, " + user.email);
-  } catch (error) {
-    console.error("Error during sign-up:", error.message);
-    alert("Sign-up failed: " + error.message);
-  }
-});
 
 // Handle Forgot Password
 ForgotPasswordBtn.addEventListener("click", async () => {
