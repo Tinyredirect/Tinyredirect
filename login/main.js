@@ -1,3 +1,4 @@
+// Firebase imports
 import {
   initializeApp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -9,7 +10,13 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  get
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
@@ -25,7 +32,15 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const database = getDatabase(app);
 
+// Retrieve elements
+const emailT = document.getElementById("emailT");
+const passwordT = document.getElementById("passwordT");
+const SignUpBtn = document.getElementById("SignUpBtn");
+const ForgotPasswordBtn = document.getElementById("ForgotPasswordBtn");
+
+// Handle Login
 document.querySelector("form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = emailT.value;
@@ -42,9 +57,9 @@ document.querySelector("form").addEventListener("submit", async (event) => {
     if (!snapshot.exists()) {
       // Register the user in the database
       await set(userRef, {
-        name: user.displayName || "Anonymous", // Default name if not available
+        name: user.displayName || "Anonymous",
         email: user.email,
-        profilePhoto: user.photoURL || "default_profile_photo_url" // Replace with a default URL
+        profilePhoto: user.photoURL || "default_profile_photo_url"
       });
       console.log("New user registered in the database:", user.email);
     }
@@ -56,6 +71,29 @@ document.querySelector("form").addEventListener("submit", async (event) => {
     alert("Login failed: " + error.message);
   }
 });
+
+// Handle Sign-Up
+
+// Handle Forgot Password
+ForgotPasswordBtn.addEventListener("click", async () => {
+  const email = emailT.value;
+
+  if (!email) {
+    alert("Please enter your email to reset your password.");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    console.log("Password reset email sent to", email);
+    alert("Password reset email sent. Check your inbox.");
+  } catch (error) {
+    console.error("Error sending password reset email:", error.message);
+    alert("Failed to send password reset email: " + error.message);
+  }
+});
+
+// Google Login
 document.getElementById("GoogleLoginBtn").addEventListener("click", async () => {
   const provider = new GoogleAuthProvider();
 
@@ -70,9 +108,9 @@ document.getElementById("GoogleLoginBtn").addEventListener("click", async () => 
     if (!snapshot.exists()) {
       // Register the user in the database
       await set(userRef, {
-        name: user.displayName || "Anonymous", // Default name if not available
+        name: user.displayName || "Anonymous",
         email: user.email,
-        profilePhoto: user.photoURL || "default_profile_photo_url" // Replace with a default URL
+        profilePhoto: user.photoURL || "default_profile_photo_url"
       });
       console.log("New user registered in the database:", user.email);
     }
