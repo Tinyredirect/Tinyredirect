@@ -9,7 +9,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
