@@ -172,6 +172,88 @@
       <a href="#">Terms of Service</a>, <a href="#">Privacy Policy</a>, and <a href="#">Acceptable Use Policy</a>.
     </div>
   </div>
-  <script src="main.js" type="module"></script>
+  <script  type="module">
+    // Firebase Imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
+  authDomain: "tiny-redirect.firebaseapp.com",
+  databaseURL: "https://tiny-redirect-default-rtdb.firebaseio.com",
+  projectId: "tiny-redirect",
+  storageBucket: "tiny-redirect.appspot.com",
+  messagingSenderId: "483985123684",
+  appId: "1:483985123684:web:0e2f992f3ae1729ee23271",
+  measurementId: "G-PQLS777XNJ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Handle Sign-Up
+SignUpBtn.addEventListener("click", async () => {
+  const email = emailT.value;
+  const password = passwordT.value;
+
+  if (!email || !password) {
+    alert("Please enter both email and password.");
+    return;
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Save user data to Realtime Database
+    const userRef = ref(database, `Users/${user.uid}`);
+    await set(userRef, {
+      name: user.displayName || "Anonymous", // Default to 'Anonymous' if no name is available
+      email: user.email,
+      profilePhoto: user.photoURL || "default_profile_photo_url" // Replace with your default photo URL
+    });
+
+    console.log("Sign-up successful and data saved to database!", user);
+    alert("Account created successfully! Welcome, " + user.email);
+  } catch (error) {
+    console.error("Error during sign-up:", error.message);
+    alert("Sign-up failed: " + error.message);
+  }
+});
+
+// Google Login
+document.getElementById("GoogleLoginBtn").addEventListener("click", async () => {
+  const provider = new GoogleAuthProvider();
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // Save user data to Realtime Database
+    const userRef = ref(database, `Users/${user.uid}`);
+    await set(userRef, {
+      name: user.displayName,
+      email: user.email,
+      profilePhoto: user.photoURL
+    });
+
+    console.log("Google login successful and data saved to database!", user);
+    alert("Logged in as " + user.displayName);
+  } catch (error) {
+    if (error.code === 'auth/popup-closed-by-user') {
+      alert("Google login was canceled.");
+    } else if (error.code === 'auth/network-request-failed') {
+      alert("Network issue. Check your connection.");
+    } else {
+      console.error("Error during Google login:", error.message);
+      alert("Google Login failed: " + error.message);
+    }
+  }
+});
+  </script>
 </body>
 </html>
