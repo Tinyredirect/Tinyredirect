@@ -135,6 +135,7 @@
     .input-str input {
       padding: 15px;
       font-size: 17px;
+      max-width: 100%;
 
     }
 
@@ -430,10 +431,10 @@ get-str">
   <p>
     <a href="#about">About</a>
     <a href="#tinyredirect">TinyRedirect</a>
-    <a href="#">Privacy Policy</a>
-    <a href="#">Facebook</a>
+    <a href="https://tinyredirect.com/privacy">Privacy Policy</a>
+    <a href="https://www.facebook.com/share/T9vcUBfaJ8iLfgT5/?mibextid=LQQJ4d">Facebook</a>
     <a href="#">Twitter(X)</a>
-    <a href="#">Instagram</a>
+    <a href="https://www.instagram.com/tinyredirect/profilecard/?igsh=MW1jcWd5Y3E0bnM=">Instagram</a>
   </p>
   <p>© 2024 TinyRedirect. All rights reserved.</p>
 </footer>
@@ -453,6 +454,9 @@ get-str">
     menu.classList.remove('active');
     document.body.classList.remove('menu-active');
   });
+  function redirect(url){
+    window.location.href = 'https://tinyredirect.com/' + `${url}`;
+  }
 </script>
 </body>
 
