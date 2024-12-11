@@ -1,244 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 
-
 <head>
-  <!-- Primary Meta Tags -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TinyRedirect - Simplify Your Links</title>
-  <meta name="description" content="TinyRedirect is your go-to tool for shortening long URLs into sleek and manageable links. Share smarter and save time.">
-  <meta name="keywords" content="URL shortener, TinyRedirect, link management, shorten links, free link shortener">
-  <meta name="author" content="TinyRedirect Team">
-  <meta name="robots" content="index, follow">
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://tinyredirect.com/">
-  <meta property="og:title" content="TinyRedirect - Simplify Your Links">
-  <meta property="og:description" content="Transform long URLs into sleek, shareable links with TinyRedirect. Start now, no login required.">
-  <meta property="og:image" content="https://tinyredirect.com/images/preview.png">
-
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://tinyredirect.com/">
-  <meta property="twitter:title" content="TinyRedirect - Simplify Your Links">
-  <meta property="twitter:description" content="Transform long URLs into sleek, shareable links with TinyRedirect. Start now, no login required.">
-  <meta property="twitter:image" content="https://tinyredirect.com/images/preview.png">
-
-  <!-- Favicon -->
-  <link rel="icon" href="https://tinyredirect.com/favicon.ico" type="image/x-icon">
-
-  <!-- Additional SEO Tags -->
-  <link rel="canonical" href="https://tinyredirect.com/">
-  <meta name="theme-color" content="#6c5ce7">
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!-- Font Awesome Kit -->
+  <script src="https://kit.fontawesome.com/89cc7652a8.js" crossorigin="anonymous"></script>
+  <!-- Google Font: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   
-<script src="https://www.google.com/recaptcha/enterprise.js?render=6LewSokqAAAAAG9Jip3JsBTPBPAIGeYYiDBLfDYQ"></script>
 
-<script type='text/javascript' src='//pl25087796.profitablecpmrate.com/69/d7/62/69d7624e82ce0050cb563479e64dd569.js'></script>
-</head>
+<!-- Firebase Authentication -->
+
+  <title>TinyRedirect</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    :root {
+      --background-color: #F7F8F9;
+      --primary-color: #24292F;
+      --secondary-color: #0366D6;
+      --hover-color: #2188FF;
+      --border-color: #D0D7DE;
+      --text-color: #6A737D;
+    }
 
-    /* General styles */
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
       margin: 0;
-      padding: 0;
-      background-color: #f8f9fa;
-      color: #333;
-      line-height: 1.6;
+    }
+
+    /* Header Styling */
+    header {
+      width: 100vw;
+      /* Full width */
+      height: 8vh;
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-section {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    .menu-icon {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    /* Sidebar Styling */
+    .sidebar {
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.8);
+      /* Semi-transparent background */
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      align-items: flex-start;
+      padding-top: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      transform: translateX(-100%);
+      /* Initially hidden */
+      transition: transform 0.3s ease;
+      z-index: 999;
     }
 
-    /* Header styles */
-    header {
-      background-color: #6c5ce7;
+    .sidebar.active {
+      transform: translateX(0);
+      /* Slide in from the left */
+    }
+
+    .sidebar h3 {
       color: white;
-      padding: 1.5em 0;
-      text-align: center;
+      font-size: 1.5rem;
+      margin-top: 40px;
+      margin-bottom: 30px;
+      padding-left: 20px;
     }
 
-    header h1 {
-      font-size: 2.5em;
-      font-weight: 700;
-      margin: 0;
-    }
-
-    header p {
-      font-size: 1.2em;
-      font-weight: 400;
-      margin-top: 0.5em;
-    }
-
-    /* Main content */
-    main {
-      flex: 1;
-      padding: 2em;
-      text-align: center;
-    }
-
-    main h2 {
-      color: #6c5ce7;
-      font-weight: 600;
-      margin-bottom: 1em;
-    }
-
-    .card-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1.5em;
-      margin-top: 2em;
-      flex-wrap: wrap;
-    }
-
-    .card {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 1.5em;
-      width: 300px;
-      text-align: center;
-      transition: transform 0.2s ease-in-out;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-    }
-
-    .card h3 {
-      color: #6c5ce7;
-      font-weight: 600;
-      margin-bottom: 0.5em;
-    }
-
-    .card p {
-      font-size: 1em;
-      color: #555;
-    }
-
-    /* URL Input Card */
-    .url-card {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 2em;
-      margin: 2em auto;
-      width: 80%;
-      max-width: 500px;
-      text-align: center;
-    }
-
-    .url-card input[type="text"] {
-      width: 80%;
-      padding: 0.8em;
-      margin: 1em 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-
-    .url-card button {
-      padding: 0.8em 1.5em;
-      background-color: #6c5ce7;
-      color: white;
+    .sidebar button {
+      width: 100%;
+      padding: 12px 20px;
+      background: none;
       border: none;
-      border-radius: 5px;
-      font-size: 1em;
+      text-align: left;
+      font-size: 1rem;
+      color: white;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.3s ease-in-out;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 8px;
     }
 
-    .url-card button:hover {
-      background-color: #5746b2;
-    }
-
-    /* Footer */
-    footer {
-      background-color: #6c5ce7;
+    .sidebar button:hover {
+      background-color: var(--hover-color);
       color: white;
-      text-align: center;
-      padding: 1em 0;
-      margin-top: auto;
     }
 
-    footer .social-icons {
-      margin-top: 1em;
+    .sidebar i {
+      font-size: 1.2rem;
     }
 
-    footer .social-icons a {
-      margin: 0 10px;
-      color: white;
-      text-decoration: none;
-      font-size: 1.5em;
-      transition: color 0.3s ease-in-out;
+    /* Section Content Styling */
+    section {
+      margin-top: 8vh;
+      padding: 2rem;
     }
 
-    footer .social-icons a:hover {
-      color: #ddd;
+    section h2 {
+      font-size: 2rem;
+      color: var(--primary-color);
+    }
+
+    section .card {
+      margin-top: 20px;
+      padding: 1rem;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
 
 <body>
-  <!-- Header Section -->
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h3>TinyRedirect</h3>
+    <button> <i class="fa-solid fa-plus"></i><span>Create New Link</span></button>
+    <button> <i class="fa-solid fa-home"></i><span>Home</span></button>
+    <button><i class="fa-solid fa-link"></i><span>Links</span></button>
+    <button> <i class="fa-solid fa-chart-line"></i><span>Analytics</span></button>
+    <button> <i class="fa-solid fa-question"></i><span>FAQ</span></button>
+    <button> <i class="fa-solid fa-gear"></i><span>Settings</span></button>
+  </div>
+
+  <!-- Header -->
   <header>
-    <h1>TinyRedirect</h1>
-    <p>Make your links shorter, simpler, and smarter.</p>
+    <div class="user-section">
+      <img src="https://via.placeholder.com/40" alt="User Avatar" class="user-avatar">
+    </div>
+    <i class="fa-solid fa-bars menu-icon" id="menuIcon"></i>
   </header>
 
-  <!-- Main Content Section -->
-  <main>
-    <h2>About TinyRedirect</h2>
-    <p>TinyRedirect is your go-to tool for shortening long URLs into sleek and manageable links.
-      Whether you're sharing on social media or organizing links for work, TinyRedirect makes it quick and simple.</p>
-
-    <!-- URL Input Card -->
-
-<!-- URL Input Card -->
-<div class="url-card">
-  <h3>Shorten Your URL</h3>
-  <p>Paste your URL below and get a shorter, shareable link instantly!</p>
-  <input type="text" placeholder="Enter your URL here..." id="targetUrlInput" />
-  <input type="text" placeholder="Enter a custom alias (optional)" id="aliasInput">
-  <div id="recaptcha-container"></div> <!-- reCAPTCHA -->
-  <div class="copy-div">
-    <input type="text" id="genLink" placeholder="Generated link" style="display:none;" />
-  </div>
-  <button id="generateBtn">Shorten URL</button>
-</div>
-
-
-    <!-- Card Container -->
-    <div class="card-container">
-      <div class="card">
-        <h3>No Credit Card Required</h3>
-        <p>Enjoy the simplicity of URL shortening without the hassle of payments or hidden fees.</p>
-      </div>
-      <div class="card">
-        <h3>No Login Needed</h3>
-        <p>Start shortening links instantly. No signups, no accounts, just efficiency.</p>
-      </div>
+  <section id="main">
+    <h2>Start sharing your links</h2>
+    <div class="card">
+      <h3>Get started</h3>
     </div>
-  </main>
+  </section>
 
-  <!-- Footer Section -->
-  <footer>
-    <p>© 2024 TinyRedirect. All rights reserved.</p>
-    <div class="social-icons">
-      <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
-      <a href="https://twitter.com" target="_blank" title="X (Twitter)"><i class="fa-brands fa-square-x-twitter"></i></a>
-      <a href="https://www.instagram.com/tinyredirect?igsh=MW1jcWd5Y3E0bnM%3D&utm_source=qr" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-    </div>
-  </footer>
-  <script src="url.js" type="module"></script>
+  <!-- JavaScript -->
+  <script type="module">
+    import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  get
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
+  authDomain: "tiny-redirect.firebaseapp.com",
+  databaseURL: "https://tiny-redirect-default-rtdb.firebaseio.com",
+  projectId: "tiny-redirect",
+  storageBucket: "tiny-redirect.firebasestorage.app",
+  messagingSenderId: "483985123684",
+  appId: "1:483985123684:web:0e2f992f3ae1729ee23271",
+  measurementId: "G-PQLS777XNJ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Menu toggle functionality
+const menuIcon = document.getElementById('menuIcon');
+const sidebar = document.getElementById('sidebar');
+
+menuIcon.addEventListener('click', () => {
+  sidebar.classList.toggle('active'); // Toggle active class for the sidebar
+});
+
+// Wait for the window to load
+window.addEventListener('load', () => {
+  // Check if a user is authenticated
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in
+      const userPic = document.querySelector('.user-avatar');
+      const photoUrl = user.photoURL || 'defaultPic.jpeg';
+      userPic.src = photoUrl;
+
+      // Define user data
+      const userData = {
+        plan: 'Free-plan', // Default plan
+        email: user.email,
+        profilePhoto: photoUrl,
+        uid: user.uid
+      };
+
+      // Reference to Firebase Realtime Database
+      const userRef = ref(database, `users/${user.uid}`);
+
+      // Check if the user is already in the database
+      get(userRef).then((snapshot) => {
+        if (!snapshot.exists()) {
+          // Add user data to Realtime Database
+          set(userRef, userData)
+            .then(() => {
+              console.log('User added to the database:', userData);
+            })
+            .catch((error) => {
+              console.error('Error adding user to database:', error);
+            });
+        } else {
+          console.log('User already exists in the database');
+        }
+      }).catch((error) => {
+        console.error('Error checking user in database:', error);
+      });
+    } else {
+      // Redirect unauthenticated users to the login page
+      window.location.href = 'https://tinyredirect.com/login';
+    }
+  });
+});
+  </script>
 </body>
 
 </html>
