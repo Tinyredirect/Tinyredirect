@@ -1,15 +1,21 @@
 // Firebase imports
-import { 
-  initializeApp 
+import {
+  initializeApp
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  sendPasswordResetEmail, 
-  GoogleAuthProvider, 
-  signInWithPopup 
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  get
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -26,11 +32,12 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const database = getDatabase(app);
 
 // Retrieve elements
-const emailT = document.getElementById("emailT");
-const passwordT = document.getElementById("passwordT");
-const SignUpBtn = document.getElementById("SignUpBtn");
+const emailT = document.getElementById("email");
+const passwordT = document.getElementById("password");
+const SignUpBtn = document.getElementById("LoginBtn");
 const ForgotPasswordBtn = document.getElementById("ForgotPasswordBtn");
 
 // Handle Login
@@ -42,8 +49,24 @@ document.querySelector("form").addEventListener("submit", async (event) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+
+    // Check if the user exists in the database
+    const userRef = ref(database, `Users/${user.uid}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+      // Register the user in the database
+      await set(userRef, {
+        name: user.displayName || "Anonymous",
+        email: user.email,
+        profilePhoto: user.photoURL || "default_profile_photo_url"
+      });
+      console.log("New user registered in the database:", user.email);
+    }
+
     console.log("Login successful!", user);
     alert("Welcome back, " + user.email);
+    window.location.href ='https://tinyredirect.com/home';
   } catch (error) {
     console.error("Error during login:", error.message);
     alert("Login failed: " + error.message);
@@ -78,8 +101,24 @@ document.getElementById("GoogleLoginBtn").addEventListener("click", async () => 
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
+
+    // Check if the user exists in the database
+    const userRef = ref(database, `Users/${user.uid}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+      // Register the user in the database
+      await set(userRef, {
+        name: user.displayName || "Anonymous",
+        email: user.email,
+        profilePhoto: user.photoURL || "default_profile_photo_url"
+      });
+      console.log("New user registered in the database:", user.email);
+    }
+
     console.log("Google login successful!", user);
     alert("Logged in as " + user.displayName);
+    window.location.href ='https://tinyredirect.com/home';
   } catch (error) {
     if (error.code === 'auth/popup-closed-by-user') {
       alert("Google login was canceled.");
