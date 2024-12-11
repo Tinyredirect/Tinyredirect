@@ -148,6 +148,20 @@
       border: 1px solid var(--border-color);
       border-radius: 8px;
       box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+      
+    }
+    .card button{
+      background: #1073FF;
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -173,9 +187,32 @@
   </header>
 
   <section id="main">
-    <h2>Start sharing your links</h2>
+    <h3>Start sharing your links</h3>
     <div class="card">
-      <h3>Get started</h3>
+      <h3>Upgrade your plan now</h3>
+      <p>And get pro features.</p>
+      <button onclick="redirect('plan')">Upgrade Plan</button>
+    </div>
+    <div class="card">
+      <h3>Getting started with tinyredirect</h3>
+      <p><span>0%</span> Completed</p>
+      <div>
+      
+        <button onclick="redirect('links')" ><i class="fa-solid fa-link"></i><h4>Shorten a Link</h4></button>
+        <button onclick="redirect('QRcodes')">
+          <i class="fa-solid fa-qrcode"></i><h4>Create a QRcode</h4>
+        </button>
+        
+      </div>
+      <p><span>0%</span> Completed</p>
+       <div>
+      
+        <button onclick="redirect('links')" ><i class="fa-solid fa-link"></i><h4>Share your Link</h4></button>
+        <button onclick="redirect('QRcodes')">
+          <i class="fa-solid fa-qrcode"></i><h4>Share your QRcode</h4>
+        </button>
+        
+      </div>
     </div>
   </section>
 
@@ -219,7 +256,15 @@ const sidebar = document.getElementById('sidebar');
 menuIcon.addEventListener('click', () => {
   sidebar.classList.toggle('active'); // Toggle active class for the sidebar
 });
-
+window.redirect = function(url) {
+  if (url) {
+    // Encode the URL to handle special characters
+    const encodedUrl = encodeURIComponent(url);
+    window.location.href = `https://tinyredirect.com/${encodedUrl}`;
+  } else {
+    return;
+  }
+};
 // Wait for the window to load
 window.addEventListener('load', () => {
   // Check if a user is authenticated
