@@ -224,7 +224,8 @@
     input:checked+.slider:before {
       transform: translateX(25px);
     }
-    .enablers{
+
+    .enablers {
       display: flex;
       justify-content: space-between;
       margin-top: 10px;
@@ -261,36 +262,36 @@
       <label for="destination">
         <b>Destination</b>
       </label>
-      <input type="text" placeholder="https://example-url.com">
+      <input type="text" placeholder="https://example-url.com" id="Durl">
       <label for="title">
         <b>Title </b>(Optional)
       </label>
-      <input type="text" placeholder="">
+      <input type="text" placeholder="" id="titleLink">
       <label for="title">
         <b>Halve Back</b>(Optional)
       </label>
-      <input type="text" placeholder="">
+      <input type="text" placeholder="" id="halveBack">
       <div class="enablers">
         <b>Enable QRcode</b>
         <label class="toggle-switch">
-         
-          <input type="checkbox">
+
+          <input type="checkbox" id="qrLink">
           <span class="slider"></span>
         </label>
       </div>
       <div class="enablers">
-  <b>Enable Analytics</b>
-  <label class="toggle-switch">
+        <b>Enable Analytics</b>
+        <label class="toggle-switch">
 
-    <input type="checkbox" disabled>
-    <span class="slider"></span>
-  </label>
-</div>
-      <button onclick="create()">
+          <input type="checkbox" id="anaLink">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button id="crtBtn">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
         Create</button>
     </div>
-    
+
   </section>
 
   <!-- JavaScript -->
@@ -385,6 +386,129 @@
           window.location.href = 'https://tinyredirect.com/login';
         }
       });
+    });
+    // Ensure your DOM elements are loaded before attaching the event listener
+    document.addEventListener('DOMContentLoaded', () => {
+      // Listen for auth state changes
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const userId = user.uid; // Get the current user's UID
+
+          document.getElementById('crtBtn').addEventListener('click', () => {
+            let Durl = document.getElementById('Durl').value.trim();
+            const halveBackInput = document.getElementById('halveBack').value.trim();
+            const anaLink = document.getElementById('anaLink').checked;
+            const qrLink = document.getElementById('qrLink').checked;
+            let titleLink = document.getElementById('titleLink').value.trim();
+
+            // Validate the Durl and add "https://" if missing
+            if (!Durl) {
+              alert("Please enter a valid Durl.");
+              return;
+            }
+            if (!Durl.startsWith("http://") && !Durl.startsWith("https://")) {
+              Durl = `https://${Durl}`;
+            }
+
+            // Generate a title if not provided
+            if (!titleLink) {
+              titleLink = generateTitle(Durl);
+            }
+
+            // Get database references
+            const database = firebase.database();
+            const linksRef = database.ref('links');
+            const userLinksRef = database.ref(`Users/${userId}/userLinks`);
+
+            // Function to generate a unique halveBack
+            const generateUniqueHalveBack = (callback) => {
+              const generatedHalveBack = halveBackInput || generateRandomString(6);
+              linksRef.orderByChild("halveBack").equalTo(generatedHalveBack).once("value", (snapshot) => {
+                if (snapshot.exists()) {
+                  // If halveBack exists, generate a new one
+                  generateUniqueHalveBack(callback);
+                } else {
+                  // If halveBack is unique, return it
+                  callback(generatedHalveBack);
+                }
+              });
+            };
+
+            // Start the process
+            generateUniqueHalveBack((uniqueHalveBack) => {
+              // Construct the target URL
+              const targetUrl = `https://tinyredirect.com/${uniqueHalveBack}`;
+
+              // Prepare URL data for user-specific storage
+              const UrlData = {
+                Durl,
+                halveBack: uniqueHalveBack,
+                anaLink,
+                qrLink,
+                titleLink,
+              };
+
+              // Prepare data for the `links` node
+              const linkData = {
+                Durl,
+                TargetUrl: targetUrl,
+                halveBack: uniqueHalveBack,
+              };
+
+              // Save to user's links
+              userLinksRef.push(UrlData, (error) => {
+                if (error) {
+                  console.error("Error saving user link data:", error);
+                  alert("Failed to save link data.");
+                } else {
+                  // Save to global links node
+                  linksRef.push(linkData, (linkError) => {
+                    if (linkError) {
+                      console.error("Error saving link to links node:", linkError);
+                      alert("Failed to save link to global database.");
+                    } else {
+                      alert("Link data saved successfully!");
+
+                      // Log the constructed URL for debugging
+                      console.log("Constructed URL:", targetUrl);
+
+                      // Reset form fields
+                      document.getElementById('Durl').value = '';
+                      document.getElementById('halveBack').value = '';
+                      document.getElementById('titleLink').value = '';
+                      document.getElementById('anaLink').checked = false;
+                      document.getElementById('qrLink').checked = false;
+                    }
+                  });
+                }
+              });
+            });
+          });
+        } else {
+          alert("User is not logged in. Please log in to create links.");
+        }
+      });
+
+      // Helper function to generate random strings
+      function generateRandomString(length) {
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let result = "";
+        for (let i = 0; i < length; i++) {
+          result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+      }
+
+      // Helper function to generate a title from the URL
+      function generateTitle(url) {
+        try {
+          const hostname = new URL(url).hostname; // Extract hostname from URL
+          return hostname.replace("www.", ""); // Remove "www." for cleaner titles
+        } catch (e) {
+          console.error("Error generating title:", e);
+          return "Generated Title"; // Fallback generic title
+        }
+      }
     });
   </script>
 </body>
