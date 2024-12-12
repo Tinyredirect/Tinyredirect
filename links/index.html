@@ -33,8 +33,7 @@
     body {
       font-family: 'Poppins', sans-serif;
       background-color: var(--background-color);
-      color
-        : var(--text-color);
+      color: var(--text-color);
       margin: 0;
     }
 
@@ -298,219 +297,200 @@
   <!-- JavaScript -->
   <script type="module">
     import {
-      initializeApp
-    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      set,
-      get
-    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  get,
+  push,
+  query,
+  orderByChild,
+  equalTo
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
-      authDomain: "tiny-redirect.firebaseapp.com",
-      databaseURL: "https://tiny-redirect-default-rtdb.firebaseio.com",
-      projectId: "tiny-redirect",
-      storageBucket: "tiny-redirect.firebasestorage.app",
-      messagingSenderId: "483985123684",
-      appId: "1:483985123684:web:0e2f992f3ae1729ee23271",
-      measurementId: "G-PQLS777XNJ"
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAN0d34eH_JowTlB5KZEeAap1PtGGoFBVc",
+  authDomain: "tiny-redirect.firebaseapp.com",
+  databaseURL: "https://tiny-redirect-default-rtdb.firebaseio.com",
+  projectId: "tiny-redirect",
+  storageBucket: "tiny-redirect.appspot.com", // Fixed storage bucket
+  messagingSenderId: "483985123684",
+  appId: "1:483985123684:web:0e2f992f3ae1729ee23271",
+  measurementId: "G-PQLS777XNJ"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const database = getDatabase(app);
+
+// Menu toggle functionality
+const menuIcon = document.getElementById('menuIcon');
+const sidebar = document.getElementById('sidebar');
+
+if (menuIcon && sidebar) {
+  menuIcon.addEventListener('click', () => {
+    sidebar.classList.toggle('active'); // Toggle active class for the sidebar
+  });
+}
+
+window.redirect = function(url) {
+  if (url) {
+    const encodedUrl = encodeURIComponent(url);
+    window.location.href = `https://tinyredirect.com/r/${encodedUrl}`; // Fixed redirect path
+  }
+};
+
+// Wait for DOM to load before adding event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setupAuthenticatedUser(user);
+    } else {
+      // Redirect unauthenticated users to login page
+      window.location.href = 'https://tinyredirect.com/login';
+    }
+  });
+
+  function setupAuthenticatedUser(user) {
+    const userPic = document.querySelector('.user-avatar');
+    const photoUrl = user.photoURL || 'defaultPic.jpeg';
+    if (userPic) userPic.src = photoUrl;
+
+    const userData = {
+      plan: 'Free-plan',
+      email: user.email,
+      profilePhoto: photoUrl,
+      uid: user.uid
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-
-    // Menu toggle functionality
-    const menuIcon = document.getElementById('menuIcon');
-    const sidebar = document.getElementById('sidebar');
-
-    menuIcon.addEventListener('click', () => {
-      sidebar.classList.toggle('active'); // Toggle active class for the sidebar
-    });
-    window.redirect = function(url) {
-      if (url) {
-        // Encode the URL to handle special characters
-        const encodedUrl = encodeURIComponent(url);
-        window.location.href = `https://tinyredirect.com/${encodedUrl}`;
+    const userRef = ref(database, `users/${user.uid}`);
+    get(userRef).then((snapshot) => {
+      if (!snapshot.exists()) {
+        set(userRef, userData)
+          .then(() => console.log('User added to the database:', userData))
+          .catch((error) => console.error('Error adding user to database:', error));
       } else {
+        console.log('User already exists in the database');
+      }
+    }).catch((error) => console.error('Error checking user in database:', error));
+
+    setupLinkCreation(user.uid);
+  }
+
+  function setupLinkCreation(userId) {
+    const crtBtn = document.getElementById('crtBtn');
+    if (!crtBtn) return;
+
+    crtBtn.addEventListener('click', () => {
+      let Durl = document.getElementById('Durl').value.trim();
+      const halveBackInput = document.getElementById('halveBack').value.trim();
+      const anaLink = document.getElementById('anaLink').checked;
+      const qrLink = document.getElementById('qrLink').checked;
+      let titleLink = document.getElementById('titleLink').value.trim();
+
+      if (!Durl) {
+        alert("Please enter a valid url.");
         return;
       }
-    };
-    // Wait for the window to load
-    window.addEventListener('load', () => {
-      // Check if a user is authenticated
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          // User is signed in
-          const userPic = document.querySelector('.user-avatar');
-          const photoUrl = user.photoURL || 'defaultPic.jpeg';
-          userPic.src = photoUrl;
-
-          // Define user data
-          const userData = {
-            plan: 'Free-plan', // Default plan
-            email: user.email,
-            profilePhoto: photoUrl,
-            uid: user.uid
-          };
-
-          // Reference to Firebase Realtime Database
-          const userRef = ref(database, `users/${user.uid}`);
-
-          // Check if the user is already in the database
-          get(userRef).then((snapshot) => {
-            if (!snapshot.exists()) {
-              // Add user data to Realtime Database
-              set(userRef, userData)
-                .then(() => {
-                  console.log('User added to the database:', userData);
-                })
-                .catch((error) => {
-                  console.error('Error adding user to database:', error);
-                });
-            } else {
-              console.log('User already exists in the database');
-            }
-          }).catch((error) => {
-            console.error('Error checking user in database:', error);
-          });
-        } else {
-          // Redirect unauthenticated users to the login page
-          window.location.href = 'https://tinyredirect.com/login';
-        }
-      });
-    });
-    // Ensure your DOM elements are loaded before attaching the event listener
-    document.addEventListener('DOMContentLoaded', () => {
-      // Listen for auth state changes
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          const userId = user.uid; // Get the current user's UID
-
-          document.getElementById('crtBtn').addEventListener('click', () => {
-            let Durl = document.getElementById('Durl').value.trim();
-            const halveBackInput = document.getElementById('halveBack').value.trim();
-            const anaLink = document.getElementById('anaLink').checked;
-            const qrLink = document.getElementById('qrLink').checked;
-            let titleLink = document.getElementById('titleLink').value.trim();
-
-            // Validate the Durl and add "https://" if missing
-            if (!Durl) {
-              alert("Please enter a valid Durl.");
-              return;
-            }
-            if (!Durl.startsWith("http://") && !Durl.startsWith("https://")) {
-              Durl = `https://${Durl}`;
-            }
-
-            // Generate a title if not provided
-            if (!titleLink) {
-              titleLink = generateTitle(Durl);
-            }
-
-            // Get database references
-            const database = firebase.database();
-            const linksRef = database.ref('links');
-            const userLinksRef = database.ref(`Users/${userId}/userLinks`);
-
-            // Function to generate a unique halveBack
-            const generateUniqueHalveBack = (callback) => {
-              const generatedHalveBack = halveBackInput || generateRandomString(6);
-              linksRef.orderByChild("halveBack").equalTo(generatedHalveBack).once("value", (snapshot) => {
-                if (snapshot.exists()) {
-                  // If halveBack exists, generate a new one
-                  generateUniqueHalveBack(callback);
-                } else {
-                  // If halveBack is unique, return it
-                  callback(generatedHalveBack);
-                }
-              });
-            };
-
-            // Start the process
-            generateUniqueHalveBack((uniqueHalveBack) => {
-              // Construct the target URL
-              const targetUrl = `https://tinyredirect.com/${uniqueHalveBack}`;
-
-              // Prepare URL data for user-specific storage
-              const UrlData = {
-                Durl,
-                halveBack: uniqueHalveBack,
-                anaLink,
-                qrLink,
-                titleLink,
-              };
-
-              // Prepare data for the `links` node
-              const linkData = {
-                Durl,
-                TargetUrl: targetUrl,
-                halveBack: uniqueHalveBack,
-              };
-
-              // Save to user's links
-              userLinksRef.push(UrlData, (error) => {
-                if (error) {
-                  console.error("Error saving user link data:", error);
-                  alert("Failed to save link data.");
-                } else {
-                  // Save to global links node
-                  linksRef.push(linkData, (linkError) => {
-                    if (linkError) {
-                      console.error("Error saving link to links node:", linkError);
-                      alert("Failed to save link to global database.");
-                    } else {
-                      alert("Link data saved successfully!");
-
-                      // Log the constructed URL for debugging
-                      console.log("Constructed URL:", targetUrl);
-
-                      // Reset form fields
-                      document.getElementById('Durl').value = '';
-                      document.getElementById('halveBack').value = '';
-                      document.getElementById('titleLink').value = '';
-                      document.getElementById('anaLink').checked = false;
-                      document.getElementById('qrLink').checked = false;
-                    }
-                  });
-                }
-              });
-            });
-          });
-        } else {
-          alert("User is not logged in. Please log in to create links.");
-        }
-      });
-
-      // Helper function to generate random strings
-      function generateRandomString(length) {
-        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        let result = "";
-        for (let i = 0; i < length; i++) {
-          result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return result;
+      if (!Durl.startsWith("http://") && !Durl.startsWith("https://")) {
+        Durl = `https://${Durl}`;
       }
 
-      // Helper function to generate a title from the URL
-      function generateTitle(url) {
-        try {
-          const hostname = new URL(url).hostname; // Extract hostname from URL
-          return hostname.replace("www.", ""); // Remove "www." for cleaner titles
-        } catch (e) {
-          console.error("Error generating title:", e);
-          return "Generated Title"; // Fallback generic title
-        }
+      if (!titleLink) {
+        titleLink = generateTitle(Durl);
+      }
+
+      const linksRef = ref(database, 'links');
+      const userLinksRef = ref(database, `users/${userId}/userLinks`);
+
+      generateUniqueHalveBack(halveBackInput, linksRef, (uniqueHalveBack) => {
+        const targetUrl = `https://tinyredirect.com/${uniqueHalveBack}`;
+
+        const UrlData = {
+          Durl,
+          halveBack: uniqueHalveBack,
+          anaLink,
+          qrLink,
+          titleLink
+        };
+
+        const linkData = {
+          Durl,
+          TargetUrl: targetUrl,
+          halveBack: uniqueHalveBack
+        };
+
+        push(userLinksRef, UrlData)
+          .then(() => {
+            push(linksRef, linkData)
+              .then(() => {
+                alert("Link data saved successfully!");
+                console.log("Constructed URL:", targetUrl);
+
+                document.getElementById('Durl').value = '';
+                document.getElementById('halveBack').value = '';
+                document.getElementById('titleLink').value = '';
+                document.getElementById('anaLink').checked = false;
+                document.getElementById('qrLink').checked = false;
+              })
+              .catch((linkError) => {
+                console.error("Error saving link to links node:", linkError);
+                alert("Failed to save link to global database.");
+              });
+          })
+          .catch((error) => {
+            console.error("Error saving user link data:", error);
+            alert("Failed to save link data.");
+          });
+      });
+    });
+  }
+
+  function generateUniqueHalveBack(input, linksRef, callback, retryCount = 0) {
+    if (retryCount > 10) {
+      console.error("Failed to generate a unique halveBack after 10 attempts.");
+      alert("Unable to generate a unique short link. Please try again.");
+      return;
+    }
+
+    const generatedHalveBack = input || generateRandomString(6);
+    const queryRef = query(linksRef, orderByChild("halveBack"), equalTo(generatedHalveBack));
+    get(queryRef).then((snapshot) => {
+      if (snapshot.exists()) {
+        generateUniqueHalveBack(input, linksRef, callback, retryCount + 1);
+      } else {
+        callback(generatedHalveBack);
       }
     });
+  }
+
+  function generateRandomString(length) {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
+  function generateTitle(url) {
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname.replace("www.", "");
+    } catch (e) {
+      console.error("Error generating title:", e);
+      return "Generated Title";
+    }
+  }
+});
   </script>
 </body>
 
