@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>TinyRedirect</title>
+
+  <!-- Font Awesome Kit -->
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script src="https://kit.fontawesome.com/89cc7652a8.js" crossorigin="anonymous"></script>
+  
+  <!-- Google Font: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Inline Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h3>TinyRedirect</h3>
+    <button onclick="redirect('links')"><i class="fa-solid fa-plus"></i><span>Create New Link</span></button>
+    <button onclick="redirect('home')"><i class="fa-solid fa-home"></i><span>Home</span></button>
+    <button onclick="redirect('links')"><i class="fa-solid fa-link"></i><span>Links</span></button>
+    <button onclick="redirect('analytics')"><i class="fa-solid fa-chart-line"></i><span>Analytics</span></button>
+    <button onclick="redirect('FQA')"><i class="fa-solid fa-question"></i><span>FAQ</span></button>
+    <button onclick="redirect('settings')"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
+    <button onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="user-section">
+      <img src="https://via.placeholder.com/40" alt="User Avatar" class="user-avatar">
+    </div>
+    <i class="fa-solid fa-bars menu-icon" id="menuIcon"></i>
+  </header>
+
+  <section id="main">
+    <h3>Create a QR Code</h3>
+    <h4>You have 8 QR codes left for this Month</h4>
+    
+    <div class="card1">
+      <div id="qrcode-container">
+        <canvas id="qrcodeCanvas" width="300" height="300"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <label for="destination"><b>Color</b></label>
+      <h4>Select One Color</h4>
+      <form id="color-form">
+        <input type="radio" name="color" class="radio-button" id="blue" value="blue">
+        <label for="blue" class="color-label">Blue</label>
+
+        <input type="radio" name="color" class="radio-button" id="green" value="green">
+        <label for="green" class="color-label">Green</label>
+
+        <input type="radio" name="color" class="radio-button" id="black" value="black">
+        <label for="black" class="color-label">Black</label>
+
+        <input type="radio" name="color" class="radio-button" id="violet" value="violet">
+        <label for="violet" class="color-label">Violet</label>
+
+        <input type="radio" name="color" class="radio-button" id="bitly-orange" value="orange">
+        <label for="bitly-orange" class="color-label">Orange</label>
+      </form>
+      <p id="selected-color">No color selected</p>
+      
+      <label for="destination"><b>Destination URL</b></label>
+      <input type="text" placeholder="https://example-url.com" id="Durl">
+      
+      <label for="title"><b>Title</b> (Optional)</label>
+      <input type="text" placeholder="" id="titleLink">
+      
+      <label for="title"><b>Halve Back</b> (Optional)</label>
+      <input type="text" placeholder="" id="halveBack">
+
+      <div class="enablers">
+        <b>Enable Analytics</b>
+        <label class="toggle-switch">
+          <input type="checkbox" id="anaLink">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <button id="save-btn"><i class="fa-solid fa-wand-magic-sparkles"></i>Create</button>
+    </div>
+  </section>
+
+  <!-- QR Code and Save PNG Script -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+  <script>
+    // Your JavaScript content here for Eruda, QR code generation, and saving logic.
+  </script>
+
+  <script>
+    
+    // Your script for QR Code generation, color selection, and saving data logic.
+  </script>
+  <script src="qr.js" type="module"></script>
+</body>
+</html>
