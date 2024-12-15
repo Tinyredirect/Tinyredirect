@@ -307,82 +307,76 @@
     });
 
     window.addEventListener('load', () => {
-      // Check if a user is authenticated
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          const dataRef = ref(database, `users/${user.uid}/userLinks`);
-          get(dataRef)
-            .then((snapshot) => {
-              if (snapshot.exists()) {
-                // Get the data from the snapshot
-                const userLinks = snapshot.val();
+  // Check if a user is authenticated
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const dataRef = ref(database, `users/${user.uid}/userLinks`);
+      get(dataRef)
+        .then((snapshot) => {
+          const container = document.getElementById('cardsContainer'); // Ensure this container exists in your HTML
 
-                // Convert userLinks to an array if it is an object
-                const userLinksArray = Object.values(userLinks);
+          if (snapshot.exists()) {
+            // Get the data from the snapshot
+            const userLinks = snapshot.val();
 
-                // Select the container where the cards will be appended
-                const container = document.getElementById('cardsContainer'); // Ensure this container exists in your HTML
+            // Convert userLinks to an array if it is an object
+            const userLinksArray = Object.values(userLinks);
 
-                // Iterate through userLinksArray and create cards
-                userLinksArray.forEach((link) => {
-                  // Create card element
-                  const card = document.createElement('div');
-                  card.classList.add('card');
+            // Iterate through userLinksArray and create cards
+            userLinksArray.forEach((link) => {
+              // Create card element
+              const card = document.createElement('div');
+              card.classList.add('card');
 
-                  // Set card content
-                  card.innerHTML = `
-                
-      <h3>${link.title}</h3>
-      <p>https://tinyredirect.com/${link.halveBack}</p>
-      <div>
-      
-        <button onclick="share(this)" ><i class="fa-solid fa-link"></i><h4>Share Qrcode</h4></button>
-        <button onclick="download(this)">
-          <i class="fa-solid fa-download"></i><h4>Download</h4>
-        </button>
-        
-      </div>
-      
-       <div>
-      <button onclick="edit(this)" 
-      style="background-color:#63D158;"
-      ><i class="fa-solid fa-pencil"></i><h4>Edit </h4></button>
-      
-        <button onclick="view(this)" ><i class="fa-solid fa-chart-line"></i><h4>View analytics</h4></button>
-        <button onclick="delete(this)" style="background-color: #FF2424">
-          <i class="fa-solid fa-trash"></i><h4>Delete</h4>
-        </button>
-        
-      </div>
-    
+              // Set card content
+              card.innerHTML = `
+                <h3>${link.title}</h3>
+                <p>https://tinyredirect.com/${link.halveBack}</p>
+                <div>
+                  <button onclick="share(this)" ><i class="fa-solid fa-link"></i><h4>Share Qrcode</h4></button>
+                  <button onclick="download(this)">
+                    <i class="fa-solid fa-download"></i><h4>Download</h4>
+                  </button>
+                </div>
+                <div>
+                  <button onclick="edit(this)" style="background-color:#63D158;">
+                    <i class="fa-solid fa-pencil"></i><h4>Edit </h4>
+                  </button>
+                  <button onclick="view(this)">
+                    <i class="fa-solid fa-chart-line"></i><h4>View analytics</h4>
+                  </button>
+                  <button onclick="delete(this)" style="background-color: #FF2424">
+                    <i class="fa-solid fa-trash"></i><h4>Delete</h4>
+                  </button>
+                </div>
               `;
 
-
-                  // Append card to the container
-                  container.appendChild(card);
-                });
-              } else {
-                console.log('No data found at this reference.');
-                const card = document.createElement('div');
-                card.classList.add('card');
-                card.innerHTML = `
+              // Append card to the container
+              container.appendChild(card);
+            });
+          } else {
+            // Handle case where no user data is found
+            console.log('No data found at this reference.');
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.innerHTML = `
               <h3>No QRcodes found</h3>
               <h4>Try creating one</h4>
               <button onclick="redirect('Qrcode')">
-              <i class="fa-solid fa-magic"></i>Create QrCode
+                <i class="fa-solid fa-magic"></i>Create QR Code
               </button>
-              `;
-              }
-              container.appendChild(card);
-            })
-            .catch((error) => {
-              console.error('Error fetching data:', error);
-            });
-        } else {
-          console.log('No user is signed in.');
-        }
-      });
-    });
+            `;
+            container.appendChild(card);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+    } else {
+      console.log('No user is signed in.');
+    }
+  });
+});
   </script>
 </body>
 
