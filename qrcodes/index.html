@@ -367,12 +367,13 @@
                 card.classList.add('card');
                 card.innerHTML = `
               <h3>No QRcodes found</h3>
-              <h4>try creating one</h4>
+              <h4>Try creating one</h4>
               <button onclick="redirect('Qrcode')">
               <i class="fa-solid fa-magic"></i>Create QrCode
               </button>
               `;
               }
+              container.appendChild(card);
             })
             .catch((error) => {
               console.error('Error fetching data:', error);
