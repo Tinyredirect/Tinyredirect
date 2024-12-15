@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <!-- Font Awesome Kit -->
 
-  
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 
   <script src="https://kit.fontawesome.com/89cc7652a8.js" crossorigin="anonymous"></script>
   <!-- Google Font: Poppins -->
@@ -333,7 +333,8 @@
                 <h3>${link.title}</h3>
                 <p>https://tinyredirect.com/${link.halveBack}</p>
                 <div>
-                  <button onclick="share(this)" ><i class="fa-solid fa-link"></i><h4>Share Qrcode</h4></button>
+                
+                  <button onclick="share()" ><i class="fa-solid fa-link"></i><h4>Share Qrcode</h4></button>
                   <button onclick="download(this)">
                     <i class="fa-solid fa-download"></i><h4>Download</h4>
                   </button>
@@ -345,7 +346,7 @@
                   <button onclick="view(this)">
                     <i class="fa-solid fa-chart-line"></i><h4>View analytics</h4>
                   </button>
-                  <button onclick="delete(this)" style="background-color: #FF2424">
+                  <button onclick="Delete(this)" style="background-color: #FF2424">
                     <i class="fa-solid fa-trash"></i><h4>Delete</h4>
                   </button>
                 </div>
@@ -377,6 +378,9 @@
     }
   });
 });
+function share(){
+  alert('clicked');
+}
   </script>
 </body>
 
