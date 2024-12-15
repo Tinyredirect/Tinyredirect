@@ -7,9 +7,11 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <!-- Font Awesome Kit -->
 
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  
 
   <script src="https://kit.fontawesome.com/89cc7652a8.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+  
   <!-- Google Font: Poppins -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -167,6 +169,33 @@
       margin-top: 8px;
       margin-bottom: 8px;
     }
+    #editMenu{
+      margin-top: 20px;
+      padding: 1rem;
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+      z-index: 999;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      visibility: hidden;
+    }
+    #editMenu button{
+      background: #1073FF;
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 
@@ -203,6 +232,33 @@
     <div id="cardsContainer">
 
     </div>
+    <div id="editMenu">
+      <h3>Preview</h3>
+      <h4></h4>
+  <div id="qrcode-container">
+   <canvas id="qrcodeCanvas" width="300" height="300"></canvas>
+ </div>
+ 
+   <form id="color-form">
+    <input type="radio" name="color" class="radio-button" id="blue" value="blue">
+    <label for="blue" class="color-label">Blue</label>
+
+    <input type="radio" name="color" class="radio-button" id="green" value="green">
+    <label for="green" class="color-label">Green</label>
+
+    <input type="radio" name="color" class="radio-button" id="black" value="black">
+    <label for="black" class="color-label">Black</label>
+
+    <input type="radio" name="color" class="radio-button" id="violet" value="violet">
+    <label for="violet" class="color-label">Violet</label>
+
+    <input type="radio" name="color" class="radio-button" id="bitly-orange" value="orange">
+    <label for="bitly-orange" class="color-label">Orange</label>
+  </form>
+  <p id="selected-color">No color selected</p>
+  
+      <button id="download-btn"onclick ="saveQRCodeAsPNG('qrcodeCanvas', 'qrcode.png');">Download</button>
+    </div>
   </section>
 
   <script>
@@ -221,7 +277,8 @@
       getDatabase,
       ref,
       set,
-      get
+      get,
+      remove
     } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
 
@@ -305,8 +362,7 @@
         }
       });
     });
-
-    window.addEventListener('load', () => {
+window.addEventListener('load', () => {
   // Check if a user is authenticated
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -333,20 +389,17 @@
                 <h3>${link.title}</h3>
                 <p>https://tinyredirect.com/${link.halveBack}</p>
                 <div>
-                
-                  <button onclick="share()" ><i class="fa-solid fa-link"></i><h4>Share Qrcode</h4></button>
-                  <button onclick="download(this)">
+                  <button class="share-button"disabled><i class="fa-solid fa-link"></i><h4>Share QRcode</h4></button>
+                  <button class="download-button" onclick ="">
                     <i class="fa-solid fa-download"></i><h4>Download</h4>
                   </button>
                 </div>
                 <div>
-                  <button onclick="edit(this)" style="background-color:#63D158;">
-                    <i class="fa-solid fa-pencil"></i><h4>Edit </h4>
-                  </button>
-                  <button onclick="view(this)">
+                  
+                  <button class="view-button">
                     <i class="fa-solid fa-chart-line"></i><h4>View analytics</h4>
                   </button>
-                  <button onclick="Delete(this)" style="background-color: #FF2424">
+                  <button class="delete-button" style="background-color: #FF2424">
                     <i class="fa-solid fa-trash"></i><h4>Delete</h4>
                   </button>
                 </div>
@@ -354,6 +407,31 @@
 
               // Append card to the container
               container.appendChild(card);
+
+              // Add event listeners to buttons within the card
+              const shareButton = card.querySelector('.share-button');
+              const downloadButton = card.querySelector('.download-button');
+              const editButton = card.querySelector('.edit-button');
+              const viewButton = card.querySelector('.view-button');
+              const deleteButton = card.querySelector('.delete-button');
+
+              shareButton.addEventListener('click', () => {
+                window.share(shareButton);
+              });
+
+              downloadButton.addEventListener('click', () => {
+                window.download(downloadButton);
+              });
+
+              
+
+              viewButton.addEventListener('click', () => {
+                window.view(viewButton);
+              });
+
+              deleteButton.addEventListener('click', () => {
+                window.Delete(deleteButton);
+              });
             });
           } else {
             // Handle case where no user data is found
@@ -378,9 +456,166 @@
     }
   });
 });
-function share(){
-  alert('clicked');
-}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // SHARE Function
+  window.share = function(button) {
+    alert('Share functionality clicked');
+  };
+
+  // DOWNLOAD Function
+  window.download = function(button) {
+    const card = button.closest('.card');
+    const title = card.querySelector('h3').innerText;
+    const link = card.querySelector('p').innerText;
+    const editMenu = document.getElementById('editMenu');
+    const h4Element = editMenu.querySelector('h4');
+    editMenu.style.visibility = 'visible';
+    h4Element.innerText = `${link}`;
+    updateQRCode(`${title}`);
+  };
+
+  
+  // VIEW Function
+  window.view = function(button) {
+    const card = button.closest('.card');
+    const title = card.querySelector('h3').innerText;
+    window.location.href ='https://tinyredirect.com/analytics'
+  };
+
+window.Delete = function(button) {
+  const card = button.closest('.card');
+  const halveBack = card.querySelector('p').innerText.split('/').pop(); // Extract the halveBack from the link
+
+  const confirmation = confirm(`Are you sure you want to delete the link with halveBack ${halveBack}?`);
+
+  if (confirmation) {
+    // Get the current user
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userLinksRef = ref(database, `users/${user.uid}/userLinks`);
+        const linksRef = ref(database, `links`); // Reference to the 'links' node
+
+        // Fetch all user links and search for the one with the given halveBack
+        get(userLinksRef)
+          .then((snapshot) => {
+            if (snapshot.exists()) {
+              const userLinks = snapshot.val();
+
+              // Find the key of the user link with the matching halveBack
+              let linkKey = null;
+              for (const key in userLinks) {
+                if (userLinks[key].halveBack === halveBack) {
+                  linkKey = key; // Store the key of the matching link
+                  break;
+                }
+              }
+
+              if (linkKey) {
+                // Remove the link from userLinks node
+                remove(ref(database, `users/${user.uid}/userLinks/${linkKey}`))
+                  .then(() => {
+                    // Now remove the link from the links node
+                    remove(ref(database, `links/${halveBack}`))
+                      .then(() => {
+                        // Remove the card from the UI
+                        card.remove();
+                        alert(`Link with halveBack ${halveBack} has been deleted.`);
+                      })
+                      .catch((error) => {
+                        console.error("Error removing link from links node:", error);
+                        alert("Failed to delete link from links node.");
+                      });
+                  })
+                  .catch((error) => {
+                    console.error("Error removing link from userLinks node:", error);
+                    alert("Failed to delete link from userLinks node.");
+                  });
+              } else {
+                alert("Link not found in userLinks.");
+              }
+            } else {
+              alert("No user links found.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching user links:", error);
+          });
+      } else {
+        console.log('No user is signed in.');
+      }
+    });
+  }
+};
+
+
+  
+});
+    const qrCodeCanvas = document.getElementById('qrcodeCanvas');
+    const radioButtons = document.querySelectorAll('.radio-button');
+const selectedColorText = document.getElementById('selected-color');
+let selectedColor = "#000000"; // Default color
+
+/**
+ * Generate QR Code with the specified data and color.
+ */
+const updateQRCode = (title) => {
+  const url = title;
+  if (!url) return;
+
+  const qr = qrcode(0, 'H'); // Error correction level 'H' (high)
+  qr.addData(url);
+  qr.make();
+
+  const ctx = qrCodeCanvas.getContext('2d');
+  const size = qrCodeCanvas.width;
+  const cellSize = Math.floor(size / qr.getModuleCount());
+
+  ctx.clearRect(0, 0, size, size);
+
+  for (let row = 0; row < qr.getModuleCount(); row++) {
+    for (let col = 0; col < qr.getModuleCount(); col++) {
+      ctx.fillStyle = qr.isDark(row, col) ? selectedColor : "#ffffff";
+      ctx.fillRect(
+        col * cellSize,
+        row * cellSize,
+        cellSize + 1,
+        cellSize + 1
+      );
+    }
+  }
+};
+
+radioButtons.forEach((radio) => {
+  radio.addEventListener('change', function() {
+    selectedColor = this.value; // Update selected color
+    selectedColorText.textContent = `Selected color: ${selectedColor}`;
+    const editMenu = document.getElementById('editMenu');
+    const h4Element = editMenu.querySelector('h4');
+    const title = h4Element.innerText;
+    updateQRCode(`${title}`); // Update QR code with the new color
+    console.log(`${selectedColor}`);
+  });
+});
+/**
+ * Save QR Code Canvas as PNG.
+ */
+ 
+const saveQRCodeAsPNG = (canvasId, filename) => {
+  
+  const canvas = document.getElementById(canvasId);
+  const link = document.createElement("a");
+  const editMenu = document.getElementById('editMenu');
+  link.href = canvas.toDataURL("image/png"); // Get PNG image data
+  link.download = filename; // Set the download filename
+  
+  editMenu.style.visibility = 'hidden';
+  link.click(); // Trigger the download
+  
+};
+window.document.getElementById('download-btn').addEventListener('click', () => {
+  saveQRCodeAsPNG('qrcodeCanvas', 'qrcode.png');
+});
   </script>
 </body>
 
