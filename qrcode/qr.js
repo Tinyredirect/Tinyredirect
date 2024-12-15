@@ -50,7 +50,7 @@ if (menuIcon && sidebar) {
 window.redirect = function(url) {
   if (url) {
     const encodedUrl = encodeURIComponent(url);
-    window.location.href = `https://tinyredirect.com/r/${encodedUrl}`; // Fixed redirect path
+    window.location.href = `https://tinyredirect.com/${encodedUrl}`; // Fixed redirect path
   }
 };
 
