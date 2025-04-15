@@ -39,7 +39,7 @@ async function connectWallet() {
 
     await db.ref("wallets/" + currentWalletAddress).set({ address: currentWalletAddress });
 
-    const userTipLink = `${window.location.origin}/tip.html?to=${nicknameInput.value.trim()}`;
+    const userTipLink = `${window.location.origin}/tip.html?to=${nicknameInput.value}`;
     tipLink.value = userTipLink;
 
     connectBtn.textContent = "Connected";
