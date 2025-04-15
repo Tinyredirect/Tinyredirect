@@ -17,8 +17,10 @@
     <p id="walletStatus">Not connected</p>
 
     <p><strong>To:</strong> <span id="recipient"></span></p>
+    <p><strong>Your Address:</strong> <span id="senderAddress">-</span></p>
 
     <input type="number" id="amount" placeholder="Amount in ETH" />
+    <textarea id="tipMessage" rows="3" placeholder="Write a message for the recipient..."></textarea>
     <button id="sendTipBtn" disabled>Send Tip</button>
 
     <p id="status"></p>
@@ -28,14 +30,18 @@
     const connectBtn = document.getElementById("connectBtn");
     const sendTipBtn = document.getElementById("sendTipBtn");
     const walletStatus = document.getElementById("walletStatus");
+    const senderAddressDisplay = document.getElementById("senderAddress");
     const recipientSpan = document.getElementById("recipient");
     const statusText = document.getElementById("status");
 
     let signer = null;
+    let senderAddress = "";
+    let recipientKey = "";
+    let recipientAddress = "";
 
-    // Get recipient address or nickname from URL
+    // Get recipient from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const recipientKey = urlParams.get("to");
+    recipientKey = urlParams.get("to");
 
     // Firebase init
     const firebaseConfig = {
@@ -45,75 +51,93 @@
       projectId: "tinytip-856d8",
       storageBucket: "tinytip-856d8.appspot.com",
       messagingSenderId: "348256301193",
-      appId: "1:348256301193:web:a8f24524db1142e17f9658",
-      measurementId: "G-2WCQL5MHHN"
+      appId: "1:348256301193:web:a8f24524db1142e17f9658"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Get recipient address from nickname or direct address
+    // Resolve recipient address
     async function resolveRecipient() {
+      if (!recipientKey) {
+        statusText.textContent = "No recipient found in URL.";
+        throw new Error("No recipient key");
+      }
+
       if (recipientKey.startsWith("0x")) {
         recipientSpan.textContent = recipientKey;
-        return recipientKey;
+        recipientAddress = recipientKey;
       } else {
         const snapshot = await db.ref("redirects/" + recipientKey.toLowerCase()).once("value");
         const data = snapshot.val();
         if (data && data.address) {
-          recipientSpan.textContent = `${data.nickname} (${data.address})`;
-          return data.address;
+          recipientSpan.textContent = `${data.nickname || recipientKey} (${data.address})`;
+          recipientAddress = data.address;
         } else {
           statusText.textContent = "Error: Unknown recipient.";
-          throw new Error("Unknown recipient");
+          throw new Error("Recipient not found in Firebase");
         }
       }
     }
 
-    // Connect wallet
+    // Connect Wallet
     connectBtn.onclick = async () => {
-      if (!window.ethereum) {
-        alert("MetaMask is not installed.");
+      if (typeof window.ethereum === "undefined") {
+        alert("Please install MetaMask.");
         return;
       }
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
       try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         signer = provider.getSigner();
-        const senderAddress = await signer.getAddress();
-        walletStatus.textContent = "Connected: " + senderAddress;
+        senderAddress = await signer.getAddress();
+        walletStatus.textContent = "Connected";
+        senderAddressDisplay.textContent = senderAddress;
         sendTipBtn.disabled = false;
       } catch (err) {
-        console.error("Connection error:", err);
-        walletStatus.textContent = "Failed to connect.";
+        console.error(err);
+        walletStatus.textContent = "Connection failed.";
       }
     };
 
-    // Handle tip send
+    // Handle send tip
     sendTipBtn.onclick = async () => {
       const amount = document.getElementById("amount").value;
-      if (!signer || !amount) {
-        alert("Connect wallet and enter an amount.");
+      const message = document.getElementById("tipMessage").value;
+
+      if (!signer || !recipientAddress || !amount) {
+        alert("Make sure you're connected and have entered a valid amount.");
         return;
       }
 
       try {
-        const recipientAddress = await resolveRecipient();
         const tx = await signer.sendTransaction({
           to: recipientAddress,
           value: ethers.utils.parseEther(amount)
         });
-        statusText.textContent = "Sent! Tx: " + tx.hash;
+
+        statusText.textContent = "Transaction sent! Waiting for confirmation...";
+        await tx.wait();
+
+        // Save tip message to Firebase
+        const tipsRef = db.ref("tips/" + recipientKey.toLowerCase());
+        await tipsRef.push({
+          from: senderAddress,
+          amount,
+          message,
+          timestamp: Date.now()
+        });
+
+        statusText.textContent = "Tip sent successfully!";
       } catch (err) {
-        console.error("Send error:", err);
+        console.error(err);
         statusText.textContent = "Error: " + err.message;
       }
     };
 
-    // Show recipient placeholder immediately
-    recipientSpan.textContent = recipientKey || "Unknown";
+    // Start
+    resolveRecipient();
   </script>
 </body>
 </html>
-
