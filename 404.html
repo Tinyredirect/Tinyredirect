@@ -1,52 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Redirecting...</title>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5f0ff;
+      color: #4b3f72;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <p id="message">Looking up tip jar...</p>
 
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB0QtZ8pHEVH-D2VNko9nW-LRSP0Btv2dg",
       authDomain: "tinytip-856d8.firebaseapp.com",
+      databaseURL: "https://tinytip-856d8-default-rtdb.firebaseio.com",
       projectId: "tinytip-856d8",
-      storageBucket: "tinytip-856d8.firebasestorage.app",
+      storageBucket: "tinytip-856d8.appspot.com",
       messagingSenderId: "348256301193",
       appId: "1:348256301193:web:a8f24524db1142e17f9658",
       measurementId: "G-2WCQL5MHHN"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const message = document.getElementById("message");
 
-    const path = window.location.pathname;
-    const parts = path.split("/");
+    const parts = window.location.pathname.split("/");
 
-    // Only check if user visits something like /tip/adrain
     if (parts[1] === "tip" && parts[2]) {
       const slug = parts[2];
 
       if (slug.startsWith("0x")) {
-        // Already a wallet address
         window.location.href = `/tip.html?to=${slug}`;
       } else {
-        const docRef = doc(db, "vanityLinks", slug);
-        getDoc(docRef).then((docSnap) => {
-          if (docSnap.exists()) {
-            const wallet = docSnap.data().wallet;
+        const ref = db.ref("redirects/" + slug.toLowerCase());
+        ref.once("value").then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const wallet = data.address;
             window.location.href = `/tip.html?to=${wallet}`;
           } else {
-            document.body.innerHTML = `<h2 style="text-align:center; font-family:'Fredoka'; color:#4b3f72;">Unknown Tip Link.</h2>`;
+            message.textContent = "Unknown Tip Link.";
           }
+        }).catch((error) => {
+          console.error("Error fetching data:", error);
+          message.textContent = "An error occurred while redirecting.";
         });
       }
     } else {
-      document.body.innerHTML = `<h2 style="text-align:center; font-family:'Fredoka'; color:#4b3f72;">404 - Page Not Found</h2>`;
+      message.textContent = "404 - Page Not Found";
     }
   </script>
-</head>
-<body>
-  <p style="text-align:center; font-family:'Fredoka'; margin-top: 3rem;">Looking up tip jar...</p>
 </body>
 </html>
