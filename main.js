@@ -6,7 +6,7 @@ const saveBtn = document.getElementById('saveBtn');
 const nicknameInput = document.getElementById('nickname');
 const tipMessageInput = document.getElementById('tipMessage');
 const liveTipMessage = document.getElementById('liveTipMessage'); // Element to show live message
-
+const valueinit = nicknameInput.value.trim()
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB0QtZ8pHEVH-D2VNko9nW-LRSP0Btv2dg",
@@ -39,7 +39,7 @@ async function connectWallet() {
 
     await db.ref("wallets/" + currentWalletAddress).set({ address: currentWalletAddress });
 
-    const userTipLink = `${window.location.origin}/tip.html?to=${nicknameInput.value}`;
+    const userTipLink = `${window.location.origin}/tip.html?to=${valueinit}`;
     tipLink.value = userTipLink;
 
     connectBtn.textContent = "Connected";
