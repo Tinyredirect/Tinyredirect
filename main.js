@@ -39,9 +39,7 @@ async function connectWallet() {
 
     await db.ref("wallets/" + currentWalletAddress).set({ address: currentWalletAddress });
 
-    const userTipLink = `${window.location.origin}/tip.html?to=${valueinit}`;
-    tipLink.value = userTipLink;
-
+    
     connectBtn.textContent = "Connected";
     connectBtn.disabled = true;
   } catch (err) {
@@ -80,8 +78,10 @@ saveBtn.addEventListener("click", async () => {
     });
 
     // Show live feedback in the UI without reloading
-    const link = `${window.location.origin}/tip.html?to=${currentWalletAddress}`;
-    tipLink.value = link;
+    
+    const userTipLink = `${window.location.origin}/tip.html?to=${valueinit}`;
+    tipLink.value = userTipLink;
+
     if (liveTipMessage) {
       liveTipMessage.textContent = `“${tipMessage}”`;
     }
