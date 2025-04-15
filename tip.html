@@ -36,7 +36,7 @@
     const recipientSpan = document.getElementById("recipient");
     const statusText = document.getElementById("status");
   
-    let signer = null;
+  
     let senderAddress = "";
     let recipientKey = "";
     let recipientAddress = "";
@@ -60,53 +60,43 @@
     const db = firebase.database();
   
     // Resolve recipient
-    async function resolveRecipient() {
-      if (!recipientKey) {
-        statusText.textContent = "No recipient found in URL.";
-        throw new Error("No recipient key");
-      }
-  
-      if (recipientKey.startsWith("0x")) {
-        recipientSpan.textContent = recipientKey;
-        recipientAddress = recipientKey;
-      } else {
-        const snapshot = await db.ref("redirects/" + recipientKey.toLowerCase()).once("value");
-        const data = snapshot.val();
-        if (data && data.address) {
-          recipientSpan.textContent = `${data.nickname || recipientKey} (${data.address})`;
-          recipientAddress = data.address;
-        } else {
-          statusText.textContent = "Error: Unknown recipient.";
-          throw new Error("Recipient not found in Firebase");
-        }
-      }
-    }
-  
-    // Connect Wallet
-    connectBtn.onclick = async () => {
-      if (typeof window.ethereum === "undefined") {
-        alert("Please install MetaMask.");
-        return;
-      }
-  
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        senderAddress = await signer.getAddress();
-  
-        walletStatus.textContent = "Connected";
-        senderAddressDisplay.textContent = senderAddress;
-        sendTipBtn.disabled = false;
-  
-        // Optional: log wallet to Firebase
-        await db.ref("wallets/" + senderAddress).set({ address: senderAddress });
-      } catch (err) {
-        console.error(err);
-        walletStatus.textContent = "Connection failed.";
-      }
-    };
-  
+    let currentWalletAddress = "";
+let provider = null;
+let signer = null;
+
+async function connectWallet() {
+  if (typeof window.ethereum === "undefined") {
+    alert("Please install MetaMask to use this app.");
+    return;
+  }
+
+  connectBtn.textContent = "Loading...";
+
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+
+    currentWalletAddress = await signer.getAddress();
+    walletAddress.textContent = currentWalletAddress;
+
+    // Optional: Save to Firebase
+    await db.ref("wallets/" + currentWalletAddress).set({ address: currentWalletAddress });
+
+    connectBtn.textContent = "Connected";
+    connectBtn.disabled = true;
+
+    // Enable send button
+    sendTipBtn.disabled = false;
+
+    console.log("Connected wallet:", currentWalletAddress);
+  } catch (err) {
+    console.error("Error connecting to MetaMask:", err);
+    connectBtn.textContent = "Connect Wallet";
+    connectBtn.disabled = false;
+  }
+}
+
     // Handle tip sending
     sendTipBtn.onclick = async () => {
       const amount = document.getElementById("amount").value;
