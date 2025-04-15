@@ -64,7 +64,8 @@ saveBtn.addEventListener("click", async () => {
   event.preventDefault(); 
   const nickname = nicknameInput.value.trim();
   const tipMessage = tipMessageInput.value.trim();
-
+  
+   const userTipLink = `${window.location.origin}/tip.html?to=${nickname}`;
   if (!nickname || !currentWalletAddress) {
     alert("Nickname and wallet address are required.");
     return;
@@ -79,7 +80,7 @@ saveBtn.addEventListener("click", async () => {
 
     // Show live feedback in the UI without reloading
     
-    const userTipLink = `${window.location.origin}/tip.html?to=${valueinit}`;
+    
     tipLink.value = userTipLink;
 
     if (liveTipMessage) {
