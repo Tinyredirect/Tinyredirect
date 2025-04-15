@@ -63,6 +63,7 @@ copyBtn.addEventListener("click", () => {
 
 // Save nickname and message
 saveBtn.addEventListener("click", async () => {
+  event.preventDefault(); 
   const nickname = nicknameInput.value.trim();
   const tipMessage = tipMessageInput.value.trim();
 
