@@ -1,25 +1,40 @@
-document.getElementById("connectBtn").onclick = async function () {
-  if (window.ethereum) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const address = await signer.getAddress();
-    document.getElementById("walletAddress").innerText = address;
-    const tipUrl = window.location.origin + "/tip.html?to=" + address;
-    document.getElementById("tipLink").value = tipUrl;
-    document.getElementById("tipSection").style.display = "block";
+const connectBtn = document.getElementById('connectBtn');
+const walletAddress = document.getElementById('walletAddress');
+const tipLink = document.getElementById('tipLink');
+const copyBtn = document.getElementById('copyBtn');
 
-    const qr = new QRCode(document.getElementById("qrcode"), {
-      text: tipUrl,
-      width: 128,
-      height: 128
-    });
-
-    document.getElementById("copyBtn").onclick = () => {
-      navigator.clipboard.writeText(tipUrl);
-      alert("Copied!");
-    };
+async function connectWallet() {
+  if (typeof window.ethereum !== "undefined") {
+    connectBtn.textContent = "Loading...";
+    try {
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      const address = accounts[0];
+      walletAddress.textContent = address;
+      tipLink.value = `${window.location.origin}/tip.html?to=${address}`;
+      generateQR(tipLink.value);
+      connectBtn.textContent = "Connected";
+      connectBtn.disabled = true;
+    } catch (err) {
+      console.error(err);
+      connectBtn.textContent = "Connect Wallet";
+    }
   } else {
-    alert("Install MetaMask or use a web3 wallet.");
+    alert("Please install MetaMask to use this app.");
   }
-};
+}
+
+connectBtn.addEventListener("click", connectWallet);
+
+function generateQR(link) {
+  const qrcode = new QRCode(document.getElementById("qrcode"), {
+    text: link,
+    width: 128,
+    height: 128
+  });
+}
+
+copyBtn.addEventListener("click", () => {
+  navigator.clipboard.writeText(tipLink.value);
+  copyBtn.textContent = "Copied!";
+  setTimeout(() => copyBtn.textContent = "Copy Link", 2000);
+});
