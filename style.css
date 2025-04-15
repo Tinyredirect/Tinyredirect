@@ -5,23 +5,22 @@ body {
   background-size: 20px 20px;
   color: #4b3f72;
   margin: 0;
-  padding: 20;
-  height: 100%;
+  padding: 20px;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  box-sizing: border-box;
 }
 
 .wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
   width: 100%;
-  max-width: 700px; /* Prevents the layout from stretching too wide */
+  max-width: 700px;
   padding: 20px;
   box-sizing: border-box;
-  margin-top: 20px;
 }
 
 header {
@@ -29,7 +28,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .avatar {
@@ -39,26 +38,40 @@ header {
 }
 
 main {
-  text-align: center;
   width: 100%;
 }
 
-form {
+.container, form {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-bottom: 20px;
 }
 
-label {
+.container label,
+form label {
+  align-self: flex-start;
   font-size: 1rem;
-  margin-bottom: 5px;
-  text-align: left;
+  margin: 10px 0 5px;
   width: 100%;
   max-width: 350px;
 }
 
-input, button, textarea {
+.container code {
+  display: block;
+  background-color: #e1d5f3;
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 350px;
+  word-wrap: break-word;
+  box-sizing: border-box;
+}
+
+input,
+button,
+textarea {
   padding: 12px;
   margin: 10px 0;
   border: none;
@@ -68,11 +81,13 @@ input, button, textarea {
   font-weight: bold;
   width: 100%;
   max-width: 350px;
-  box-sizing: border-box;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
-input:focus, button:focus, textarea:focus {
+input:focus,
+textarea:focus,
+button:focus {
   outline: none;
   box-shadow: 0 0 5px rgba(75, 63, 114, 0.8);
 }
@@ -90,8 +105,35 @@ button:active {
   background-color: #b2a2d0;
 }
 
+#qrcode {
+  margin-top: 20px;
+}
+
+.info-section {
+  margin-top: 40px;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+}
+
+.info-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.info-section p,
+.info-section ul {
+  font-size: 1rem;
+  color: #4b3f72;
+}
+
+.info-section ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
 footer {
-  padding: 10px;
+  padding: 20px 10px;
   font-size: 0.9rem;
   text-align: center;
   width: 100%;
@@ -106,38 +148,17 @@ footer a:hover {
   text-decoration: underline;
 }
 
-#qrcode {
-  margin-top: 20px;
-}
-
-.info-section {
-  margin-top: 40px;
-  text-align: left;
-  width: 100%;
-  max-width: 600px; /* Ensures consistency in section size */
-}
-
-.info-section h2 {
-  font-size: 1.5rem;
-  color: #4b3f72;
-  margin-bottom: 10px;
-}
-
-.info-section p, .info-section ul {
-  font-size: 1rem;
-  color: #4b3f72;
-}
-
-.info-section ul {
-  padding-left: 20px;
-}
-
 @media (max-width: 600px) {
-  .wrapper {
+  body {
     padding: 10px;
   }
 
-  input, button, textarea {
+  input,
+  button,
+  textarea,
+  .container code,
+  .container label,
+  form label {
     max-width: 100%;
   }
 

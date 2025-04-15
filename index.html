@@ -20,23 +20,30 @@
 
     <main>
       <h1>Your Tip Link</h1>
-      
-      <code id="walletAddress"></code>
-      <input type="text" id="tipLink" readonly />
-      <button id="copyBtn">Copy Link</button>
-      <div id="qrcode"></div>
 
-      <form>
-        <label for="nickname">Your Nickname</label>
-        <input type="text" id="nickname" placeholder="e.g. Anonymous Owl" required />
+      <div class="container">
+        <label for="walletAddress">Wallet Address</label>
+        <code id="walletAddress"></code>
 
-        <label for="tipMessage">Tip Message</label>
-        <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
+        <label for="tipLink">Tip Link</label>
+        <input type="text" id="tipLink" readonly />
 
-        <button id="saveBtn">Save Tip</button>
-      </form>
+        <button id="copyBtn">Copy Link</button>
+        <div id="qrcode"></div>
+      </div>
 
-      <!-- New Informative Sections -->
+      <div class="form-container">
+        <form>
+          <label for="nickname">Your Nickname</label>
+          <input type="text" id="nickname" placeholder="e.g. Anonymous Owl" required />
+
+          <label for="tipMessage">Tip Message</label>
+          <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
+
+          <button id="saveBtn">Save Tip</button>
+        </form>
+      </div>
+
       <section class="info-section">
         <h2>Why You Should Use TinyRedirect</h2>
         <p>TinyRedirect allows you to easily share your cryptocurrency address with others. With a personalized tip link and a unique QR code, you can make tipping and receiving crypto quick and easy.</p>
@@ -55,7 +62,6 @@
         <h2>Privacy</h2>
         <p>Your privacy is important to us. We do not store any personal information or the funds you receive. Your wallet address is only used to generate a unique tip link.</p>
       </section>
-
     </main>
 
     <footer>
