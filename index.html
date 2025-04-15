@@ -1,85 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tiny Tip - Create</title>
+  <meta charset="UTF-8">
+  <title>TinyRedirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <style>
-    body {
-      font-family: 'Fredoka', sans-serif;
-      background-color: #f5f0ff;
-      background-image: radial-gradient(#e1d5f3 2px, transparent 1px);
-      background-size: 20px 20px;
-      color: #4b3f72;
-      margin: 0;
-      padding: 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 500px;
-      width: 100%;
-      background: white;
-      border-radius: 24px;
-      padding: 2rem;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    }
-    input, textarea {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
-      font-family: 'Fredoka', sans-serif;
-      border: 1px solid #ccc;
-      border-radius: 12px;
-      font-size: 1rem;
-    }
-    button {
-      margin-top: 1.5rem;
-      background-color: #6a4dad;
-      color: white;
-      font-family: 'Fredoka', sans-serif;
-      padding: 0.75rem 1rem;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    #linkOutput {
-      margin-top: 2rem;
-      font-size: 0.95rem;
-      background: #f0eaff;
-      padding: 1rem;
-      border-radius: 12px;
-      display: none;
-    }
-  </style>
+  <script src="qrcode.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1 style="text-align: center;">Create Your Tip Jar</h1>
-    <p>Welcome to Tiny Tip! We let you receive anonymous crypto tips. We only charge a 0.1% fee to keep the lights on.</p>
+  <div class="wrapper">
+    <header>
+      <img src="avatar.svg" alt="Avatar" class="avatar">
+      <button id="connectBtn">Connect Wallet</button>
+    </header>
 
-    <label for="nickname">Your Nickname <span style="color:red">*</span></label>
-    <input id="nickname" required placeholder="e.g. Anonymous Owl" />
+    <main>
+      <h1>Your Tip Link</h1>
+      <code id="walletAddress"></code>
+      <input type="text" id="tipLink" readonly />
+      <button id="copyBtn">Copy Link</button>
+      <div id="qrcode"></div>
 
-    <label for="tipMessage" style="margin-top: 1rem;">Tip Message (optional)</label>
-    <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
+      <label for="nickname">Your Nickname</label>
+      <input type="text" id="nickname" placeholder="e.g. Anonymous Owl" required />
 
-    <label for="address" style="margin-top: 1rem;">Your Wallet Address <span style="color:red">*</span></label>
-    <input id="address" required placeholder="e.g. 0x..." />
+      <label for="tipMessage">Tip Message</label>
+      <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
 
-    <button id="generate">Generate My Tip Link</button>
+      <button id="saveBtn">Save Tip</button>
+    </main>
 
-    <div id="linkOutput">
-      <strong>Your Link:</strong>
-      <p id="yourLink"></p>
-      <p>Give it a try and start getting tips instantly!</p>
-    </div>
+    <footer>
+      <a href="https://x.com/yourhandle" target="_blank">X (Twitter)</a>
+    </footer>
   </div>
 
   <script>
@@ -97,25 +54,57 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    document.getElementById("generate").addEventListener("click", async () => {
-      const nick = document.getElementById("nickname").value.trim();
-      const msg = document.getElementById("tipMessage").value.trim();
-      const address = document.getElementById("address").value.trim();
+    let currentWalletAddress = "";
 
-      if (!nick || !address) {
-        alert("Nickname and address are required.");
+    document.getElementById("connectBtn").addEventListener("click", async () => {
+      if (typeof window.ethereum !== "undefined") {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          currentWalletAddress = accounts[0];
+          document.getElementById("walletAddress").textContent = currentWalletAddress;
+
+          // Store wallet address to Firebase
+          await db.ref("wallets/" + currentWalletAddress).set({
+            address: currentWalletAddress,
+          });
+
+          const userTipLink = `https://tinyredirect.com/tip/${currentWalletAddress}`;
+          document.getElementById("tipLink").value = userTipLink;
+
+          // Generate QR code
+          new QRCode(document.getElementById("qrcode"), userTipLink);
+        } catch (error) {
+          console.error(error);
+        }
+      } else {
+        alert("Please install MetaMask!");
+      }
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      const tipLink = document.getElementById("tipLink");
+      tipLink.select();
+      document.execCommand("copy");
+      alert("Link copied to clipboard!");
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const nickname = document.getElementById("nickname").value.trim();
+      const tipMessage = document.getElementById("tipMessage").value.trim();
+
+      if (!nickname || !currentWalletAddress) {
+        alert("Nickname and wallet address are required.");
         return;
       }
 
-      await db.ref("redirects/" + nick.toLowerCase()).set({
-        to: address,
-        msg,
-        nick
+      // Save the nickname and tip message to Firebase
+      await db.ref("redirects/" + nickname.toLowerCase()).set({
+        address: currentWalletAddress,
+        message: tipMessage,
+        nickname: nickname,
       });
 
-      const yourLink = `https://tinyredirect.com/tip/${nick.toLowerCase()}`;
-      document.getElementById("yourLink").textContent = yourLink;
-      document.getElementById("linkOutput").style.display = "block";
+      alert("Tip saved successfully! Your link is ready.");
     });
   </script>
 </body>
