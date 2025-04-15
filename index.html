@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TinyRedirect - Create Tip Link</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+  <script src="qrcode.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>TinyRedirect</h1>
+    <button id="connectBtn">Connect Wallet</button>
+    <div id="tipSection" style="display:none;">
+      <p>Your address:</p>
+      <code id="walletAddress"></code>
+      <p>Your Tip Link:</p>
+      <input type="text" id="tipLink" readonly />
+      <button id="copyBtn">Copy Link</button>
+      <div id="qrcode"></div>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
