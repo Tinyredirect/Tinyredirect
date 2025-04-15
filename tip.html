@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Send a Tip - TinyRedirect</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -12,11 +12,108 @@
 <body>
   <div class="container">
     <h1>Send a Tip</h1>
+
+    <button id="connectBtn">Connect Wallet</button>
+    <p id="walletStatus">Not connected</p>
+
     <p><strong>To:</strong> <span id="recipient"></span></p>
+
     <input type="number" id="amount" placeholder="Amount in ETH" />
-    <button id="sendTipBtn">Send Tip</button>
+    <button id="sendTipBtn" disabled>Send Tip</button>
+
     <p id="status"></p>
   </div>
-  <script src="tip.js"></script>
+
+  <script>
+    const connectBtn = document.getElementById("connectBtn");
+    const sendTipBtn = document.getElementById("sendTipBtn");
+    const walletStatus = document.getElementById("walletStatus");
+    const recipientSpan = document.getElementById("recipient");
+    const statusText = document.getElementById("status");
+
+    let signer = null;
+
+    // Get recipient address or nickname from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const recipientKey = urlParams.get("to");
+
+    // Firebase init
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0QtZ8pHEVH-D2VNko9nW-LRSP0Btv2dg",
+      authDomain: "tinytip-856d8.firebaseapp.com",
+      databaseURL: "https://tinytip-856d8-default-rtdb.firebaseio.com",
+      projectId: "tinytip-856d8",
+      storageBucket: "tinytip-856d8.appspot.com",
+      messagingSenderId: "348256301193",
+      appId: "1:348256301193:web:a8f24524db1142e17f9658",
+      measurementId: "G-2WCQL5MHHN"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Get recipient address from nickname or direct address
+    async function resolveRecipient() {
+      if (recipientKey.startsWith("0x")) {
+        recipientSpan.textContent = recipientKey;
+        return recipientKey;
+      } else {
+        const snapshot = await db.ref("redirects/" + recipientKey.toLowerCase()).once("value");
+        const data = snapshot.val();
+        if (data && data.address) {
+          recipientSpan.textContent = `${data.nickname} (${data.address})`;
+          return data.address;
+        } else {
+          statusText.textContent = "Error: Unknown recipient.";
+          throw new Error("Unknown recipient");
+        }
+      }
+    }
+
+    // Connect wallet
+    connectBtn.onclick = async () => {
+      if (!window.ethereum) {
+        alert("MetaMask is not installed.");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      try {
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        const senderAddress = await signer.getAddress();
+        walletStatus.textContent = "Connected: " + senderAddress;
+        sendTipBtn.disabled = false;
+      } catch (err) {
+        console.error("Connection error:", err);
+        walletStatus.textContent = "Failed to connect.";
+      }
+    };
+
+    // Handle tip send
+    sendTipBtn.onclick = async () => {
+      const amount = document.getElementById("amount").value;
+      if (!signer || !amount) {
+        alert("Connect wallet and enter an amount.");
+        return;
+      }
+
+      try {
+        const recipientAddress = await resolveRecipient();
+        const tx = await signer.sendTransaction({
+          to: recipientAddress,
+          value: ethers.utils.parseEther(amount)
+        });
+        statusText.textContent = "Sent! Tx: " + tx.hash;
+      } catch (err) {
+        console.error("Send error:", err);
+        statusText.textContent = "Error: " + err.message;
+      }
+    };
+
+    // Show recipient placeholder immediately
+    recipientSpan.textContent = recipientKey || "Unknown";
+  </script>
 </body>
 </html>
+
