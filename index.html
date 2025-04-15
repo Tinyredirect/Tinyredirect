@@ -1,48 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>TinyRedirect</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tiny Tip - Create</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-  <script src="qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5f0ff;
+      background-image: radial-gradient(#e1d5f3 2px, transparent 1px);
+      background-size: 20px 20px;
+      color: #4b3f72;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: white;
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      font-family: 'Fredoka', sans-serif;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 1.5rem;
+      background-color: #6a4dad;
+      color: white;
+      font-family: 'Fredoka', sans-serif;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    #linkOutput {
+      margin-top: 2rem;
+      font-size: 0.95rem;
+      background: #f0eaff;
+      padding: 1rem;
+      border-radius: 12px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>
-      <img src="avatar.svg" alt="Avatar" class="avatar">
-      <button id="connectBtn">Connect Wallet</button>
-    </header>
-<main style="max-width: 600px; padding: 2rem; text-align: center;">
-  <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Welcome to TinyRedirect</h1>
-  <p style="font-size: 1rem; line-height: 1.6;">
-    TinyRedirect is an <strong>anonymous crypto tip jar</strong> built with privacy and simplicity in mind. Connect your wallet, get your unique tip link, and start receiving tips instantly — no sign-ups, no IDs.
-  </p>
+  <div class="container">
+    <h1 style="text-align: center;">Create Your Tip Jar</h1>
+    <p>Welcome to Tiny Tip! We let you receive anonymous crypto tips. We only charge a 0.1% fee to keep the lights on.</p>
 
-  <p style="font-size: 0.95rem; margin-top: 1rem; background-color: #e9ddff; padding: 0.75rem; border-radius: 12px;">
-    <strong>We charge a flat 0.1% fee</strong> to keep the service running — no hidden costs.
-  </p>
+    <label for="nickname">Your Nickname <span style="color:red">*</span></label>
+    <input id="nickname" required placeholder="e.g. Anonymous Owl" />
 
-  <p style="margin-top: 1rem; font-size: 0.95rem;">
-    Share your link anywhere: profiles, bios, streams, blogs. All tips go straight to your wallet.
-  </p>
-</main>
+    <label for="tipMessage" style="margin-top: 1rem;">Tip Message (optional)</label>
+    <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
 
-    <main>
-      <h1>Your Tip Link</h1>
-      <code id="walletAddress"></code>
-      <input type="text" id="tipLink" readonly />
-      <button id="copyBtn">Copy Link</button>
-      <div id="qrcode"></div>
-    </main>
+    <label for="address" style="margin-top: 1rem;">Your Wallet Address <span style="color:red">*</span></label>
+    <input id="address" required placeholder="e.g. 0x..." />
 
-    <footer>
-      <a href="https://x.com/yourhandle" target="_blank">X (Twitter)</a>
-    </footer>
+    <button id="generate">Generate My Tip Link</button>
+
+    <div id="linkOutput">
+      <strong>Your Link:</strong>
+      <p id="yourLink"></p>
+      <p>Give it a try and start getting tips instantly!</p>
+    </div>
   </div>
 
-  <script src="main.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB0QtZ8pHEVH-D2VNko9nW-LRSP0Btv2dg",
+      authDomain: "tinytip-856d8.firebaseapp.com",
+      databaseURL: "https://tinytip-856d8-default-rtdb.firebaseio.com",
+      projectId: "tinytip-856d8",
+      storageBucket: "tinytip-856d8.appspot.com",
+      messagingSenderId: "348256301193",
+      appId: "1:348256301193:web:a8f24524db1142e17f9658",
+      measurementId: "G-2WCQL5MHHN"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    document.getElementById("generate").addEventListener("click", async () => {
+      const nick = document.getElementById("nickname").value.trim();
+      const msg = document.getElementById("tipMessage").value.trim();
+      const address = document.getElementById("address").value.trim();
+
+      if (!nick || !address) {
+        alert("Nickname and address are required.");
+        return;
+      }
+
+      await db.ref("redirects/" + nick.toLowerCase()).set({
+        to: address,
+        msg,
+        nick
+      });
+
+      const yourLink = `https://tinyredirect.com/tip/${nick.toLowerCase()}`;
+      document.getElementById("yourLink").textContent = yourLink;
+      document.getElementById("linkOutput").style.display = "block";
+    });
+  </script>
 </body>
 </html>
