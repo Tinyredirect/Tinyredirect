@@ -20,18 +20,42 @@
 
     <main>
       <h1>Your Tip Link</h1>
+      
       <code id="walletAddress"></code>
       <input type="text" id="tipLink" readonly />
       <button id="copyBtn">Copy Link</button>
       <div id="qrcode"></div>
 
-      <label for="nickname">Your Nickname</label>
-      <input type="text" id="nickname" placeholder="e.g. Anonymous Owl" required />
+      <form>
+        <label for="nickname">Your Nickname</label>
+        <input type="text" id="nickname" placeholder="e.g. Anonymous Owl" required />
 
-      <label for="tipMessage">Tip Message</label>
-      <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
+        <label for="tipMessage">Tip Message</label>
+        <textarea id="tipMessage" rows="3" placeholder="Write a short message to display..."></textarea>
 
-      <button id="saveBtn">Save Tip</button>
+        <button id="saveBtn">Save Tip</button>
+      </form>
+
+      <!-- New Informative Sections -->
+      <section class="info-section">
+        <h2>Why You Should Use TinyRedirect</h2>
+        <p>TinyRedirect allows you to easily share your cryptocurrency address with others. With a personalized tip link and a unique QR code, you can make tipping and receiving crypto quick and easy.</p>
+      </section>
+
+      <section class="info-section">
+        <h2>How to Use</h2>
+        <ul>
+          <li>Click "Connect Wallet" to connect your MetaMask wallet.</li>
+          <li>Once connected, your wallet address will appear and a personalized tip link will be generated.</li>
+          <li>Share the tip link with others and receive cryptocurrency tips directly to your wallet.</li>
+        </ul>
+      </section>
+
+      <section class="info-section">
+        <h2>Privacy</h2>
+        <p>Your privacy is important to us. We do not store any personal information or the funds you receive. Your wallet address is only used to generate a unique tip link.</p>
+      </section>
+
     </main>
 
     <footer>
@@ -39,73 +63,6 @@
     </footer>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB0QtZ8pHEVH-D2VNko9nW-LRSP0Btv2dg",
-      authDomain: "tinytip-856d8.firebaseapp.com",
-      databaseURL: "https://tinytip-856d8-default-rtdb.firebaseio.com",
-      projectId: "tinytip-856d8",
-      storageBucket: "tinytip-856d8.appspot.com",
-      messagingSenderId: "348256301193",
-      appId: "1:348256301193:web:a8f24524db1142e17f9658",
-      measurementId: "G-2WCQL5MHHN"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let currentWalletAddress = "";
-
-    document.getElementById("connectBtn").addEventListener("click", async () => {
-      if (typeof window.ethereum !== "undefined") {
-        try {
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-          currentWalletAddress = accounts[0];
-          document.getElementById("walletAddress").textContent = currentWalletAddress;
-
-          // Store wallet address to Firebase
-          await db.ref("wallets/" + currentWalletAddress).set({
-            address: currentWalletAddress,
-          });
-
-          const userTipLink = `https://tinyredirect.com/tip/${currentWalletAddress}`;
-          document.getElementById("tipLink").value = userTipLink;
-
-          // Generate QR code
-          new QRCode(document.getElementById("qrcode"), userTipLink);
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        alert("Please install MetaMask!");
-      }
-    });
-
-    document.getElementById("copyBtn").addEventListener("click", () => {
-      const tipLink = document.getElementById("tipLink");
-      tipLink.select();
-      document.execCommand("copy");
-      alert("Link copied to clipboard!");
-    });
-
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-      const nickname = document.getElementById("nickname").value.trim();
-      const tipMessage = document.getElementById("tipMessage").value.trim();
-
-      if (!nickname || !currentWalletAddress) {
-        alert("Nickname and wallet address are required.");
-        return;
-      }
-
-      // Save the nickname and tip message to Firebase
-      await db.ref("redirects/" + nickname.toLowerCase()).set({
-        address: currentWalletAddress,
-        message: tipMessage,
-        nickname: nickname,
-      });
-
-      alert("Tip saved successfully! Your link is ready.");
-    });
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
